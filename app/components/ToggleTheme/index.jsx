@@ -57,7 +57,7 @@ const ToggleTheme = () => {
           style={[
             styles.toggleCircle,
             toggleCircleStyle,
-            { backgroundColor: isDarkMode ? '#000' : '#fff' },
+            { backgroundColor: isDarkMode ? COLORS[theme].accent : '#fff' },
           ]}
         >
           <Icon

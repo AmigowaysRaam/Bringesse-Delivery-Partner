@@ -5,6 +5,10 @@ import SplashScreen from '../screens/splash-screen';
 import LoginScreen from '../screens/login-screen';
 import HomeTabRouter from './home_router';
 import GetStartedScreen from '../screens/GetStartedScreen';
+import PersonalInfoScreen from '../screens/tabs/Edit-profile';
+import EditProfile from '../screens/tabs/Edit-profile/editProfile';
+import RegisterScreen from '../screens/tabs/Edit-profile/RegisterScreen';
+import WalletHistory from '../screens/WalletHistory';
 const Stack = createNativeStackNavigator();
 const MyTheme = {
   dark: true,
@@ -33,6 +37,15 @@ function InitialRouter() {
           animationEnabled: false,  // Disable animations for all screens
         }} />
         <Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />
+        
+        <Stack.Screen name="PersonalInfoScreen" component={PersonalInfoScreen} />
+        
+        <Stack.Screen name="EditProfile" component={EditProfile} />
+        <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+        <Stack.Screen name="WalletHistory" component={WalletHistory} />
+
+        
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "236810268956",
-    "project_id": "thundersgym-70d62",
-    "storage_bucket": "thundersgym-70d62.firebasestorage.app"
+    "project_number": "989733009995",
+    "project_id": "bringessedeliverypartner",
+    "storage_bucket": "bringessedeliverypartner.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:236810268956:android:eab33f9c9aa3fee1450ad9",
+        "mobilesdk_app_id": "1:989733009995:android:1c21759346e7a484996bce",
         "android_client_info": {
           "package_name": "com.app.bringessedeliverypartner"
         }
@@ -15,26 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB_56CYrq6UZpe9cBkGSeMXQ5_1b63IllU"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:236810268956:android:67343e2390bcc55a450ad9",
-        "android_client_info": {
-          "package_name": "com.thundersgym.thundersgym"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyB_56CYrq6UZpe9cBkGSeMXQ5_1b63IllU"
+          "current_key": "AIzaSyAebIczLvdHI1zy2Vz11oMoed6Zme2pg7Y"
         }
       ],
       "services": {

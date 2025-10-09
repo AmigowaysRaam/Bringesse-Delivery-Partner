@@ -13,7 +13,7 @@ const HeaderBar = ({
   // profileImg,
   // align,
   // showTitleOnly = false,
-  showBackArrow = true,
+  showBackArrow,
   title = '',
   onBackIconPress,
   // messageCount, loggedType

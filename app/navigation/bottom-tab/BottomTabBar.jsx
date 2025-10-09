@@ -6,6 +6,7 @@ import {
   Text,
   StyleSheet,
   Dimensions,
+  Image,
 } from 'react-native';
 import IonicIcon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
@@ -14,6 +15,7 @@ import { COLORS } from '../../resources/colors'; // Static color scheme
 import { commonStyles } from '../../resources/styles'; // Assuming common styles
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext'; // Assuming theme context
+import { IMAGE_ASSETS } from '../../resources/images';
 
 const { width } = Dimensions.get('window');
 const TAB_WIDTH = width / 5; // Each tab has equal width
@@ -28,13 +30,13 @@ const getTabIcon = (routeName, isFocused, colorScheme) => {
     case 'Home':
       return <IonicIcon name="home" color={iconColor} size={wp(6)} />;
     case 'Booking':
-      return <MaterialIcon name="book" color={iconColor} size={wp(6)} />;
+      return <Image source={IMAGE_ASSETS?.moneybag} style={{width:wp(6),height:wp(6),tintColor:iconColor}} />;
     case 'Notification':
       return <IonicIcon name="notifications-outline" color={iconColor} size={wp(6)}/>;
     case 'ExplorePackages':
       return <IonicIcon name="apps" color={iconColor} size={wp(6)} />;
     case 'T-Social':
-      return <MaterialIcon name="supervised-user-circle" color={iconColor} size={wp(6)} />;
+      return <Image source={IMAGE_ASSETS?.schedule} style={{width:wp(6),height:wp(6),tintColor:iconColor}} />;
     case 'More':
       return <MaterialIcon name="person" color={iconColor} size={wp(6)} />;
     default:

@@ -8,3 +8,14 @@ export async function getLangData() {
   return await AsyncStorage.getItem("lang_data");
 }
 
+
+export async function getAccesstoken() {
+  return await AsyncStorage.getItem("access_token");
+}
+
+export async function getrefreshtoken() {
+  return await AsyncStorage.getItem("refresh_token");
+}
+
+
+

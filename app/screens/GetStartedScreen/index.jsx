@@ -20,8 +20,6 @@ export default function GetStartedScreen() {
   } = useAuthHoc();
 
   const [network, setNetwork] = React.useState(false);
-
-
   useEffect(() => {
     fetchUserData();
   }, [network]);
@@ -37,11 +35,12 @@ export default function GetStartedScreen() {
     }
   };
   const redirectScreen = async () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'login-screen' }],
-      animation: 'none',
-    });
+    navigation?.navigate('login-screen')
+    // navigation.navigate({
+    //   index: 0,
+    //   routes: [{ name: 'login-screen' }],
+    //   animation: 'none',
+    // });
   };
   const { theme } = useTheme();
   return (

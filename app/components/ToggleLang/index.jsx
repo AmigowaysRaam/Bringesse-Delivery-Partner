@@ -20,22 +20,16 @@ const width = wp(10);
 const ToggleLang = ({ Icon1, Icon2, lang }) => {
   const { profile } = UseProfileHook();
   const { theme, toggleTheme } = useTheme();
-
   const { language, toggleLanguage } = useLanguage();
-
   const isDarkMode = theme === 'dark';
-
   // Initialize the toggle value based on current language
   const [isToggleOn, setIsToggleOn] = useState(i18n.language === 'ar' ? 1 : 0); // 1 for Arabic, 0 for English
-
   const toggleAnimation = useSharedValue(isToggleOn);
-
   const toggleCircleStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: toggleAnimation.value === 1 ? width : 0 }],
     };
   });
-
   const {
     reducerConstants: { },
     actions: { APP_LANG_API_CALL, APP_LANG_CHANGE_USER_API_CALL },
@@ -44,12 +38,9 @@ const ToggleLang = ({ Icon1, Icon2, lang }) => {
   const langchangeBtn = () => {
     const newLang = isToggleOn === 0 ? 'ar' : 'en';
     setIsToggleOn(!isToggleOn); // Toggle the state value
-
     toggleAnimation.value = withTiming(isToggleOn ? 0 : 1, { duration: 500 });
-
     getLangData(newLang); // Pass the new language to getLangData function
     toggleLanguage(newLang)
-
     APP_LANG_CHANGE_USER_API_CALL({
       task: { clearData: true },
       request: {
@@ -69,37 +60,34 @@ const ToggleLang = ({ Icon1, Icon2, lang }) => {
         },
       },
     });
-
   };
-
   function getLangData(newLang) {
-    if (!_.isEmpty(profile)) {
-      APP_LANG_API_CALL({
-        task: { clearData: true },
-        request: {
-          payload: {
-            userid: profile.id,
-            locale: newLang,
-          },
-        },
-        callback: {
-          successCallback({ message, data }) {
-            if (data && !_.isEmpty(data?.data)) {
-              AsyncStorage.setItem('lang_data', JSON.stringify(data?.data?.data));
-              const translations = data?.data?.data; // Assuming API response contains the translations in JSON format
-              i18n.addResourceBundle(newLang, 'translation', translations, true, true);
-              i18n.changeLanguage(newLang); // Change the language globally
+    // if (!_.isEmpty(profile)) {
+    //   APP_LANG_API_CALL({
+    //     task: { clearData: true },
+    //     request: {
+    //       payload: {
+    //         userid: profile.id,
+    //         locale: newLang,
+    //       },
+    //     },
+    //     callback: {
+    //       successCallback({ message, data }) {
+    //         if (data && !_.isEmpty(data?.data)) {
+    //           AsyncStorage.setItem('lang_data', JSON.stringify(data?.data?.data));
+    //           const translations = data?.data?.data; // Assuming API response contains the translations in JSON format
+    //           i18n.addResourceBundle(newLang, 'translation', translations, true, true);
+    //           i18n.changeLanguage(newLang); // Change the language globally
 
-            }
-          },
-          errorCallback(message) {
-            console.log('Error:', message);
-          },
-        },
-      });
-    }
+    //         }
+    //       },
+    //       errorCallback(message) {
+    //         console.log('Error:', message);
+    //       },
+    //     },
+    //   });
+    // }
   }
-
   return (
     <Animated.View
       style={[
@@ -111,12 +99,14 @@ const ToggleLang = ({ Icon1, Icon2, lang }) => {
         },
         commonStyles[theme].shadow,
       ]}>
-      <TouchableOpacity onPress={langchangeBtn} style={styles.toggleContainer}>
+      <TouchableOpacity
+      //  onPress={langchangeBtn} 
+       style={styles.toggleContainer}>
         <Animated.View
           style={[
             styles.toggleCircle,
             toggleCircleStyle,
-            { backgroundColor: isDarkMode ? '#000' : '#fff' },
+            { backgroundColor: isDarkMode ?  COLORS[theme].accent : '#fff' },
           ]}>
           {/* Switch icons based on the toggle state */}
           <Icon

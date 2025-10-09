@@ -48,6 +48,7 @@
     "react-native-country-codes-picker": "^2.3.5",
     "react-native-date-picker": "^5.0.13",
     "react-native-datepicker": "^1.7.2",
+    "react-native-device-info": "^14.1.1",
     "react-native-dropdown-menu": "^2.0.0",
     "react-native-element-dropdown": "^2.12.1",
     "react-native-emoji-selector": "^0.2.0",

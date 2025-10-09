@@ -1,25 +1,81 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, Switch, StyleSheet } from 'react-native';
+import { View, Text, Switch, StyleSheet, Alert } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { COLORS } from '../resources/colors';
 import { wp } from '../resources/dimensions';
 import { poppins } from '../resources/fonts';
+import { useDispatch, useSelector } from 'react-redux';
+import DeviceInfo from 'react-native-device-info';
+import { fetchData } from '../api/api';
+import { useFocusEffect } from '@react-navigation/native';
 
 const UserToggleStatus = () => {
-    const [isOnline, setIsOnline] = useState(false);
+
+    const [isOnline, setIsOnline] = useState(null);
     const { theme } = useTheme();
     const { t } = useTranslation();
-
-    const toggleSwitch = () => setIsOnline(prev => !prev);
-
+    const dispatch = useDispatch();
+    const profileDetails = useSelector(state => state.Auth.profileDetails);
+    
+    useEffect(() => {
+        fetchProfileData();
+    }, [])
+    const fetchProfileData = async () => {
+        if (!accessToken || !profile?.driver_id) return;
+        try {
+            const data = await fetchData('profile/' + profile?.driver_id, 'GET', null, {
+                Authorization: `${accessToken}`,
+                driver_id: profile.driver_id,
+            });
+            console.log('UpdatedProfile', JSON.stringify(data?.live_status ? "online" :"off"));
+            setIsOnline(data?.live_status ? true : false)
+            dispatch({
+                type: 'PROFILE_DETAILS',
+                payload: data,
+            });
+        } catch (error) {
+            console.error('profile API Error:', error);
+        } finally {
+            // setLoading(false);
+        }
+    };
+    const toggleSwitch = async () => {
+        if (!accessToken || !profile?.driver_id) return;
+        setIsOnline(prev => !prev)
+        const deviceId = await DeviceInfo.getUniqueId();
+        const payLoad = {
+            driver_id: profile.driver_id,
+            live_status: isOnline ? '0' : '1'
+        };
+        try {
+            const data = await fetchData('updateprofile', 'PATCH', payLoad, {
+                Authorization: `${accessToken}`,
+                driver_id: profile.driver_id,
+                device_id: deviceId,
+            });
+            // console.log('getrevenue Data', JSON.stringify(data));
+            //   setRevenueData(data);
+            fetchProfileData();
+            dispatch({
+                type: 'UPDATE_PROFILE',
+                payload: data,
+            });
+        } catch (error) {
+            console.error('getrevenue API Error:', error);
+        } finally {
+            //   setLoading(false);
+        }
+    };
     const onlineText = t('userStatus.online') || 'Online';
     const offlineText = t('userStatus.offline') || 'Offline';
+    const profile = useSelector(state => state.Auth.profile);
+    const accessToken = useSelector(state => state.Auth.accessToken);
 
     return (
         <View style={[styles.card, {
             backgroundColor: COLORS[theme].background,
-            borderColor: 'grey',
+            // borderColor: 'grey',
         }]}>
             <Text style={[poppins.semi_bold.h7, styles.statusText, { color: COLORS[theme].primary }]}>
                 {isOnline ? onlineText : offlineText}
@@ -41,15 +97,10 @@ const styles = StyleSheet.create({
         paddingVertical: wp(4),
         paddingHorizontal: wp(4),
         borderRadius: wp(2),
-        borderWidth: wp(0.2),borderColor: '#CCC',
-        margin: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3, // Android shadow
+        borderWidth: wp(0.3), borderColor: '#ccc',
+        margin: wp(1),
     },
- 
+
 });
 
 export default UserToggleStatus;

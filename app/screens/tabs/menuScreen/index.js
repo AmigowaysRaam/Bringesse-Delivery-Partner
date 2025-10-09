@@ -1,13 +1,11 @@
-
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Alert,
 } from 'react-native';
 import { hp, wp } from '../../../resources/dimensions';
 import { Icon } from 'react-native-paper';
 import { poppins } from '../../../resources/fonts';
-import { useNavigation } from '@react-navigation/native';
-import { useAuthHoc } from '../../../config/config';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { COLORS } from '../../../resources/colors';
 import { useTheme } from '../../../context/ThemeContext';
 import ToggleTheme from '../../../components/ToggleTheme';
@@ -17,69 +15,42 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ToggleLang from '../../../components/ToggleLang';
 import { useTranslation } from 'react-i18next';
-import { t } from 'i18next';
+import UserProfileCard from '../../UserProfileCard';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchData } from '../../../api/api';
+import DeviceInfo from 'react-native-device-info';
+// --- Logout Section ---
 const LogoutSection = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
-  const { t } = useTranslation(); // Initialize translation hook
+  const { t } = useTranslation();
+  const handleLogout = () => {
+    Alert.alert(
+      t('confirm_logout'),
+      t('are_you_sure_logout'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('yes_Logout'),
+          onPress: () => {
+            AsyncStorage.clear();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'login-screen' }],
+            });
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
-    <View
-      style={[
-        { backgroundColor: COLORS[theme].viewBackground },
-      ]}>
-      <TouchableOpacity
-        onPress={() => {
-          // Show an alert with translated texts
-          Alert.alert(
-            t('confirm_logout'), // Translates 'Confirm Logout' text
-            t('are_you_sure_logout'), // Translates 'Are you sure you want to log out?' text
-            [
-              {
-                text: t('cancel'), // Assuming you have a translation key for 'Cancel'
-                // onPress: () => console.log('Logout cancelled'),
-                style: 'cancel',
-              },
-              {
-                text: t('yes_Logout'), // Assuming you have a translation key for 'Yes, Logout'
-                onPress: () => {
-                  AsyncStorage.clear(); // Clear stored data
-                  navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'login-screen' }],
-                  });
-                },
-              },
-            ],
-            { cancelable: true },
-          );
-        }}
-        style={{
-          flexDirection: 'row',
-          paddingVertical: wp(2),
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: wp(4),
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingVertical: wp(2),
-            alignItems: 'center',
-            marginStart: wp(8),
-            gap: wp(4),
-          }}>
-          <MaterialIcon
-            name="logout"
-            size={wp(5)}
-            color={COLORS[theme].textPrimary}
-          />
-          <Text
-            style={[
-              poppins.medium.h7,
-              {
-                color: COLORS[theme].textPrimary,
-              },
-            ]}>
+    <View style={{ backgroundColor: COLORS[theme].viewBackground }}>
+      <TouchableOpacity onPress={handleLogout} style={sectionRow}>
+        <View style={leftRow}>
+          <MaterialIcon name="logout" size={wp(5)} color={COLORS[theme].textPrimary} />
+          <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary }]}>
             {t('Logout')}
           </Text>
         </View>
@@ -93,197 +64,175 @@ const LogoutSection = () => {
     </View>
   );
 };
-
-
+// --- Theme Toggle Section ---
 const ThemeSection = () => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   return (
-    <View
-      style={[
-        { backgroundColor: COLORS[theme].viewBackground },
-        // commonStyles[theme].shadow,
-      ]}>
-      <View
-        onPress={() => { }}
-        style={{
-          flexDirection: 'row',
-          paddingVertical: wp(4),
-          paddingEnd: wp(4),
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: wp(4),
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingVertical: wp(2),
-            alignItems: 'center',
-            marginStart: wp(8),
-            gap: wp(4),
-          }}>
+    <View style={{ backgroundColor: COLORS[theme].viewBackground }}>
+      <View style={sectionRow}>
+        <View style={leftRow}>
           <MaterialCommunityIcon
-            name={'theme-light-dark'}
+            name="theme-light-dark"
             size={wp(5)}
             color={COLORS[theme].textPrimary}
           />
-          <Text
-            style={[
-              poppins.medium.h7,
-              {
-                color: COLORS[theme].textPrimary,
-              },
-            ]}>
+          <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary }]}>
             {t('dark_mode')}
           </Text>
         </View>
-
         <ToggleTheme />
       </View>
     </View>
   );
 };
+   
+// --- Language Toggle Section ---
 const LangSection = () => {
-  const { theme } = useTheme();
 
-  const [isSwitchOn1, setisSwitchOn1] = useState(0);
-  const onToggleSwitch1 = () => {
-    if (isSwitchOn1 == 0) { setisSwitchOn1(1) } else
-      setisSwitchOn1(0);
-  }
+  const { theme } = useTheme();
+  const { t } = useTranslation();
   return (
-    <View
-      style={[
-        { backgroundColor: COLORS[theme].viewBackground },
-        // commonStyles[theme].shadow,
-      ]}>
-      <View
-        style={{
-          flexDirection: 'row',
-          paddingVertical: wp(4),
-          paddingEnd: wp(4),
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: wp(3.5),
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingVertical: wp(2),
-            alignItems: 'center',
-            marginStart: wp(8),
-            gap: wp(3.5),
-          }}>
+    <View style={{ backgroundColor: COLORS[theme].viewBackground }}>
+      <View style={sectionRow}>
+        <View style={leftRow}>
           <MaterialCommunityIcon
-            name={'language-lua'}
+            name="google-translate"
             size={wp(6)}
             color={COLORS[theme].textPrimary}
           />
-          <Text
-            style={[
-              poppins.medium.h7,
-              {
-                color: COLORS[theme].textPrimary,
-                textTransform: "capitalize"
-              },
-            ]}>
+          <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary }]}>
             {t('language')}
-
           </Text>
         </View>
-
-        <ToggleLang Icon1={'format-letter-case'} Icon2={'abjad-arabic'} lang={true} />
+        <ToggleLang Icon1="format-letter-case" Icon2="abjad-arabic" lang />
       </View>
     </View>
   );
 };
-
-function MoreScreen() {
-
-
+// --- MoreScreen Main Component ---
+const MoreScreen = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const [availVersion] = useState('1.0.0'); // or fetch from config or constants
+  const profile = useSelector(state => state.Auth.profile);
+  const navigation = useNavigation();
+  const accessToken = useSelector(state => state.Auth.accessToken);
+  const dispatch = useDispatch();
+  
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfileData = async () => {
+          console.log('profile'," JSON.stringify(data)");
+        if (!accessToken || !profile?.driver_id) return;
+          console.log('profile', '2');
 
-  const [userData, setUserData] = React.useState({});
-  const [setBadgeData, setSubscriptionsData] = React.useState(null);
-  const [availVersion, setAvailVersion] = React.useState(null);
+        try {
+          const data = await fetchData('profile/'+ profile?.driver_id, 'GET', null, {
+            Authorization: `${accessToken}`,
+            driver_id: profile.driver_id,
+            // device_id: deviceId,
+          });
+          // console.log('profile', JSON.stringify(data));
+          dispatch({
+            type: 'PROFILE_DETAILS',
+            payload: data,
+          });
+        } catch (error) {
+          console.error('profile API Error:', error);
+        } finally {
+          // setLoading(false);
+        }
+      };
+      fetchProfileData();
+    }, [])
+  );
 
-  const {
-    actions: { APP_GET_USER_API_CALL },
-  } = useAuthHoc();
-
-
-
+  const SectionItem = ({ icon, label ,navigationPath}) => (
+    <TouchableOpacity onPress={()=>navigation?.navigate(navigationPath)} style={{ backgroundColor: COLORS[theme].viewBackground }}>
+      <View style={sectionRow}>
+        <View style={leftRow}>
+          <MaterialCommunityIcon
+            name={icon}
+            size={wp(6)}
+            color={COLORS[theme].textPrimary}
+          />
+          <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary }]}>
+            {t(label)}
+          </Text>
+        </View>
+        <Icon
+          source={'menu-right'}
+          size={wp(8)}
+          style={{ margin: wp(10) }}
+          color={COLORS[theme].textPrimary}
+        />
+      </View>
+    </TouchableOpacity>
+  );
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={{ backgroundColor: COLORS[theme].background }}>
-        <View
-          style={{ gap: wp(2), marginHorizontal: wp(2), paddingVertical: hp(2), paddingBottom: hp(5) }}>
-          <ThemeSection t={t} />
-          <LangSection t={t} />
-          <LogoutSection t={t} />
-          <View
-            style={[
-              { backgroundColor: COLORS[theme].viewBackground },
-              // commonStyles[theme].shadow,
-            ]}>
-            <View
-              style={{
-                flexDirection: 'row',
-                paddingVertical: wp(2),
-                paddingEnd: wp(4),
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: wp(3.5),
-              }}>
-              <View
-                style={{
-                  width: wp(80),
-                  flexDirection: 'row',
-                  paddingVertical: wp(2),
-                  marginStart: wp(8),
-                  gap: wp(3.5),
-                  justifyContent: "space-between"
-                }}>
-                <View style={{
-                  flexDirection: 'row',
-                  gap: wp(3),
-                }}>
+      <View style={{ flex: 1, backgroundColor: COLORS[theme].background }}>
+        {/* User Profile (Fixed at Top) */}
+        <UserProfileCard profile={profile} />
+        {/* Scrollable Settings */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingVertical: hp(2),
+            paddingBottom: hp(5),
+            gap: wp(2),
+            marginHorizontal: wp(2),
+          }}>
+          <SectionItem icon="face-man-profile" label="personal_info"  navigationPath='PersonalInfoScreen' navigation={navigation} />
+          <SectionItem icon="wallet" label="wallet_history" navigationPath='WalletHistory' navigation={navigation} />
+          <SectionItem icon="archive-star"  navigation={navigation} label="reviews"  navigationPath='PersonalInfoScreen' />
+          <ThemeSection />
+          <LangSection />
+          <LogoutSection />
+
+          {/* App Version Info */}
+          <View style={{ backgroundColor: COLORS[theme].viewBackground }}>
+            <View style={sectionRow}>
+              <View style={[leftRow, { justifyContent: 'space-between', width: wp(80) }]}>
+                <View style={{ flexDirection: 'row', gap: wp(3) }}>
                   <MaterialCommunityIcon
-                    name={'information'}
+                    name="information"
                     size={wp(6)}
                     color={COLORS[theme].textPrimary}
                   />
-                  <Text
-                    style={[
-                      poppins.medium.h7,
-                      {
-                        color: COLORS[theme].textPrimary,
-                        textTransform: "capitalize"
-                      },
-                    ]}>
+                  <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary }]}>
                     {t('version')}
                   </Text>
                 </View>
-                <Text
-                  style={[
-                    poppins.medium.h7,
-                    {
-                      color: COLORS[theme].textPrimary,
-                      // textTransform: "capitalize"
-                    },
-                  ]}>
-                  {/* {`(v.${VersionCheck?.getCurrentVersion()})`} */}
+                <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary }]}>
                   {`(v.${availVersion})`}
-
                 </Text>
               </View>
             </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </GestureHandlerRootView>
   );
-}
+};
+
+// --- Common Styles ---
+const sectionRow = {
+  flexDirection: 'row',
+  paddingVertical: wp(4),
+  paddingEnd: wp(4),
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: wp(3.5),
+};
+
+const leftRow = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginStart: wp(8),
+  gap: wp(4),
+};
+
 export default MoreScreen;

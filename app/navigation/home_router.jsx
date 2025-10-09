@@ -7,6 +7,9 @@ import HomeScreen from '../screens/tabs/home-screen';
 import Tsocial from '../screens/tabs/account/Tsocial';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Notification from '../screens/Notification';
+import RevenueScreen from '../screens/RevenueScreen';
+import OrdersScreen from '../screens/OrdersScreen';
 const Tab = createBottomTabNavigator();
 function HomeTabRouter() {
   const { t } = useTranslation();
@@ -24,14 +27,14 @@ function HomeTabRouter() {
       {/* Conditionally show Booking, Notification, T-Social */}
      
         <>
-          <Tab.Screen name={t('Booking')} component={HomeScreen} />
+          <Tab.Screen name={t('Booking')} component={RevenueScreen} />
           <Tab.Screen
             name={t('T-Social')}
-            component={HomeScreen}
+            component={OrdersScreen}
             // initialParams={{ currentUserId: profile?.id }}
           />
         </>
-      <Tab.Screen name={t('Notification')} component={HomeScreen} />
+      <Tab.Screen name={t('Notification')} component={Notification} />
       <Tab.Screen name={t('More')} component={MoreScreen} />
     </Tab.Navigator>
   );

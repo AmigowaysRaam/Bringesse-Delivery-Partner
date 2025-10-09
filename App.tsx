@@ -119,10 +119,26 @@ function App(): React.JSX.Element {
       { cancelable: false }
     );
   };
+  useEffect(() => {
+    checkPushNotificationPermission();
+  
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      const title = remoteMessage.notification?.title || 'Default Title';
+      const body = remoteMessage.notification?.body || 'Default Body';
+  
+      // Show alert when notification arrives
+      Alert.alert(title, body);
+  
+      // Optional: show local notification as well
+      onDisplayNotification({ title, body });
+    });
+  
+    return unsubscribe;
+  }, []);
+  
 
   useEffect(() => {
     checkPushNotificationPermission();
-
     const unsubscribe = messaging().onMessage(remoteMessage => {
       onDisplayNotification({
         title: remoteMessage.notification?.title || 'Default Title',
@@ -180,6 +196,7 @@ function App(): React.JSX.Element {
     </ThemeProvider>
   );
 }
+
 
 const AppContainer = () => {
   const { theme } = useTheme();

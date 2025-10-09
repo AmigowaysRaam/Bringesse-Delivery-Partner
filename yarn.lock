@@ -4638,6 +4638,7 @@ __metadata:
     react-native-country-codes-picker: ^2.3.5
     react-native-date-picker: ^5.0.13
     react-native-datepicker: ^1.7.2
+    react-native-device-info: ^14.1.1
     react-native-dropdown-menu: ^2.0.0
     react-native-element-dropdown: ^2.12.1
     react-native-emoji-selector: ^0.2.0
@@ -10094,6 +10095,15 @@ __metadata:
   dependencies:
     moment: ^2.22.0
   checksum: 41b3a6b28b8b5d618e6d487b7268b233f9e3815d805ac90e3c0e5b1640ec3555e155f09b3833795d4f900bf5b9cf6fa4759f155c39130773864fbdf1413247d8
+  languageName: node
+  linkType: hard
+
+"react-native-device-info@npm:^14.1.1":
+  version: 14.1.1
+  resolution: "react-native-device-info@npm:14.1.1"
+  peerDependencies:
+    react-native: "*"
+  checksum: bfd5e63fb9b4e4697caa5be289c619ac2988c0eb4f0d5b9025fcaed82596e861812786c37796647e1d9d8b2ac2afaab383c0e091097540161b9a4e334fd673e1
   languageName: node
   linkType: hard
 
