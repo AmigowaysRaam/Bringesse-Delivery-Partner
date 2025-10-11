@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator,
+  Image,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,15 +18,16 @@ import DeviceInfo from 'react-native-device-info';
 const WalletHistory = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState('Ongoing');
+  const [activeTab, setActiveTab] = useState('withdraw');
   const profile = useSelector(state => state.Auth.profile);
   const accessToken = useSelector(state => state.Auth.accessToken);
-  const [orders, setOrders] = useState([]);
+  const [walletData, setWalletDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetchingMore, setFetchingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const limit = 10;
+  const siteDetails = useSelector(state => state.Auth.siteDetails);
 
   // Icon by order status
   const getIconName = (status) => {
@@ -87,25 +89,12 @@ const WalletHistory = () => {
         driver_id: profile.driver_id,
         device_id: deviceId,
       };
-
       try {
-        if (pageNumber === 1) setLoading(true);
-        else setFetchingMore(true);
-
-        const data = await fetchData('orderhistory', 'POST', payload, headers);
-        console?.log(data, 'dataOrders');
-
-        if (data?.status && Array.isArray(data.orders)) {
-          if (pageNumber === 1) {
-            setOrders(data.orders);
-          } else {
-            setOrders((prev) => [...prev, ...data.orders]);
-          }
-          setHasMore(data.orders.length >= limit);
-        } else {
-          if (pageNumber === 1) setOrders([]);
-          setHasMore(false);
-        }
+        // if (pageNumber === 1) setLoading(true);
+        // else setFetchingMore(true);
+        const data = await fetchData('walletinfo', 'POST', payload, headers);
+        console?.log(data, 'data');
+        setWalletDetail(data)
       } catch (err) {
         console.error('Orders fetch error:', err);
       } finally {
@@ -113,7 +102,7 @@ const WalletHistory = () => {
         setFetchingMore(false);
       }
     },
-    [accessToken, profile?.driver_id, activeTab]
+    [accessToken, profile?.driver_id,]
   );
 
   useEffect(() => {
@@ -129,53 +118,61 @@ const WalletHistory = () => {
       fetchOrders(nextPage);
     }
   };
-
   const renderFooter = () =>
     fetchingMore ? (
       <View style={styles.footerLoader}>
         <ActivityIndicator color={COLORS[theme].accent} />
       </View>
     ) : null;
-
   const renderItem = ({ item }) => (
     <View style={[styles.card, { backgroundColor: COLORS[theme].viewBackground }]}>
       <View style={styles.iconContainer}>
-        <MaterialCommunityIcon
-          name={getIconName(item.order_status)}
-          size={wp(7)}
-          color={COLORS[theme].accent}
-        />
+      <Image
+        source={{ uri: siteDetails?.media_url + item?.source_image}}
+        style={{ width: wp(15), height: wp(15), borderRadius: wp(7.5), borderWidth: wp(0.5), borderColor: COLORS[theme].primary, borderColor: COLORS[theme].accent }}
+            />
       </View>
       <View style={styles.textContainer}>
         <Text style={[poppins.semi_bold.h7, { color: COLORS[theme].textPrimary }]}>
-          {item?.store_name || t('store_name')}
+          {item?.source_name || t('store_name')}
         </Text>
 
-        <Text numberOfLines={1} style={[poppins.regular.h9, { color: COLORS[theme].textPrimary }]}>
-          {item?.store_location}
+        <Text style={[poppins.regular.h7, {
+          color: COLORS[theme].textPrimary, backgroundColor: COLORS[theme].accent, padding: wp(1), borderRadius: wp(1), alignSelf: 'flex-start'  // 👈 Add this
+        }]}>
+          {item?.order_id}
         </Text>
-
-        <Text style={[poppins.regular.h8, { color: COLORS[theme].textPrimary, marginTop: wp(1) }]}>
-          {getStatusText(item.order_status)}
-        </Text>
-
         <Text style={[poppins.regular.h8, { color: COLORS[theme].textPrimary, marginTop: wp(1.5) }]}>
-          {formatDateTime(item?.ordered_time)}
-        </Text>
-
-        <Text style={[poppins.regular.h8, { color: COLORS[theme].textPrimary, marginTop: wp(1) }]}>
-          {`${item.currency_symbol || ''}${item.delivery_charge?.toFixed(2) || ''}`}
+          {formatDateTime(item?.time)}
         </Text>
       </View>
+      <Text style={[poppins.regular.h4, { color: COLORS[theme].textPrimary, marginTop: wp(1) }]}>
+        {`${item.currency_symbol || ''} ${item.price?.toFixed(2) || ''}`}
+      </Text>
     </View>
   );
   return (
-    <GestureHandlerRootView style={{ flex: 1 , backgroundColor: COLORS[theme].background}}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: COLORS[theme].background }}>
       <HeaderBar title={t('WalletHistory') || 'WalletHistory'} showBackArrow={true} />
       <View style={{ flex: 1, backgroundColor: COLORS[theme].background }}>
         {/* Tabs */}
+
+        <View style={{ height: wp(14), width: wp(90), alignSelf: "center", borderWidth: wp(0.3), borderColor: COLORS[theme].textPrimary, borderRadius: wp(2), justifyContent: "center" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: wp(5), justifyContent: "space-between" }}>
+            <Text style={[poppins.semi_bold.h7, {
+              color: COLORS[theme].textPrimary,
+            }]}>Total Balance</Text>
+            <Text style={[poppins.semi_bold.h7, {
+              color: COLORS[theme].textPrimary,
+            }]}>
+              {`${walletData?.currency_symbol} ${walletData?.wallet_amount}`}
+              {/* {JSON.stringify(walletData)} */}
+            </Text>
+          </View>
+        </View>
+
         <View style={styles.tabContainer}>
-          {['Ongoing', 'Completed'].map((tab) => (
+          {['withdraw', 'history'].map((tab) => (
             <TouchableOpacity
               key={tab}
               style={[
@@ -210,7 +207,7 @@ const WalletHistory = () => {
           </View>
         ) : (
           <FlatList
-            data={orders}
+            data={activeTab == 'history' ? walletData?.wallet_history : []}
             keyExtractor={(item) => item.order_id.toString()}
             renderItem={renderItem}
             contentContainerStyle={styles.scrollContent}
@@ -220,7 +217,7 @@ const WalletHistory = () => {
             ListEmptyComponent={
               <View style={{ padding: wp(5), alignItems: 'center' }}>
                 <Text style={[poppins.regular.h7, { color: COLORS[theme].textPrimary }]}>
-                  {t('no_orders_found') || 'No orders found.'}
+                  {t('no_data') || 'no_data'}
                 </Text>
               </View>
             }

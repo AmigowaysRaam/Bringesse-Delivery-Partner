@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Alert,
-} from 'react-native';
+  View,  Text,  StyleSheet,
+  Image,  Alert,} from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { COLORS } from '../resources/colors';
 import { wp, hp } from '../resources/dimensions';
@@ -14,29 +10,27 @@ import { poppins } from '../resources/fonts';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchData } from '../api/api';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-
 const UserProfileCard = ({ userstatus }) => {
   const [isOnline] = useState(userstatus);
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const profile = useSelector(state => state.Auth.profile);
-  const siteDetails = useSelector(state => state.Auth.siteDetails);
-  const accessToken = useSelector(state => state.Auth.accessToken);
+  const siteDetails = useSelector(state => state.Auth?.siteDetails);
+  const accessToken = useSelector(state => state.Auth?.accessToken);
   const profileDetails = useSelector(state => state.Auth.profileDetails);
   const dispatch = useDispatch();
-  const fullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
-  const address = profile?.location || t('No address available');
+  const fullName = `${profileDetails?.first_name || ''} ${profileDetails?.last_name || ''}`.trim();
+  const address = profileDetails?.location || t('No address available');
   useEffect(() => {
     fetchProfileData();
   }, []);
 
   const fetchProfileData = async () => {
     // Alert.alert( siteDetails?.media_url)
-    if (!accessToken || !profile?.driver_id) return;
+    if (!accessToken || !profileDetails?.driver_id) return;
     try {
-      const data = await fetchData('profile/' + profile?.driver_id, 'GET', null, {
+      const data = await fetchData('profile/' + profileDetails?.driver_id, 'GET', null, {
         Authorization: `${accessToken}`,
-        driver_id: profile.driver_id,
+        driver_id: profileDetails.driver_id,
       });
       dispatch({
         type: 'PROFILE_DETAILS',

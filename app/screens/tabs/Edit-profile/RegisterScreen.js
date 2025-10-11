@@ -5,6 +5,7 @@ import {
     KeyboardAvoidingView, TouchableOpacity, Text,
     Alert,
     PermissionsAndroid,
+    ToastAndroid,
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -21,6 +22,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { fetchData } from '../../../api/api';
 import Geolocation from 'react-native-geolocation-service';
+import VerifyPhoneModal from '../../VerifyPhoneModal';
+
 
 const RegisterScreen = () => {
     const { theme } = useTheme();
@@ -28,7 +31,8 @@ const RegisterScreen = () => {
     const navigation = useNavigation();
     const siteDetails = useSelector(state => state.Auth.siteDetails);
     const [location, setLocation] = useState(null);
-
+    const [verifyModalVisible, setVerifyModalVisible] = useState(false);
+    const [verifiedPhone, setVerifiedPhone] = useState('');
     // Focus effect will run every time screen is focused
     useFocusEffect(
         useCallback(() => {
@@ -81,7 +85,6 @@ const RegisterScreen = () => {
             }
         );
     };
-
     const [formValues, setFormValues] = useState(__DEV__ ? {
         firstName: 'test', lastName: 'test2', location: 'testLocation',
         email: 'teat@gmail.com', password: '123456', confirmPassword: '123456',
@@ -91,6 +94,8 @@ const RegisterScreen = () => {
         mobileNumber: '1234567890',   // added mobileNumber field
         weight: '100',         // added weight field (numeric)
         vehicle_no: 'TN01TG0023',
+        referal_code: 'TESTRef0001',
+
     } :
         {
             firstName: '',
@@ -107,6 +112,8 @@ const RegisterScreen = () => {
             mobileNumber: '',
             weight: '',
             vehicle_no: '',
+            referal_code: '',
+
         }
     );
     // Function to toggle terms acceptance
@@ -197,6 +204,12 @@ const RegisterScreen = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+    const handlePhoneVerification = (phone) => {
+        // setVerifiedPhone(phone);
+        setFormValues(prev => ({ ...prev, mobileNumber: phone }));
+        ToastAndroid.show('Phone number verified.', ToastAndroid.SHORT);
+        showMessage({ message: 'Phone number verified.', type: 'success' });
+    };
 
     const handleSubmit = async () => {
         if (validateFields()) {
@@ -214,15 +227,18 @@ const RegisterScreen = () => {
                 "partner_type": formValues?.transportOptions || "",
                 "vehicle_category": formValues?.vehicleCategory,
                 "vehicle_number": formValues?.vehicle_no,
-                "capacity": `${formValues?.weight}` || "",                        // mapped from 
+                "capacity": `${formValues?.weight}` || "",
+                "referral_code": formValues?.referal_code                    // mapped from 
             }
             try {
                 const data = await fetchData('signup/', 'POST', payLoad, {
                 });
-                if (data?.status) {
-                    const userDatas = data;
-                    console.log('User data saved',userDatas);
+                // Alert.alert(JSON.stringify(data))
+                const userDatas = data;
 
+                if (data?.status == "true") {
+                    const userDatas = data;
+                    // console.log('User data saved', userDatas);
                     try {
                         await AsyncStorage.setItem('user_data', JSON.stringify(userDatas));
                         console.log('User data saved');
@@ -230,6 +246,7 @@ const RegisterScreen = () => {
                         console.error('AsyncStorage error:', error);
                     }
                     // Show success
+                    ToastAndroid.show(userDatas?.message, ToastAndroid.SHORT);
                     showMessage({
                         message: userDatas?.message,
                         description: userDatas?.message,
@@ -252,11 +269,14 @@ const RegisterScreen = () => {
                         },
                     });
                     // Navigate
-                    navigation.replace('home-screen');
+                    setTimeout(() => {
+                        navigation.replace('home-screen');
+                    }, 2000);
                 } else {
+                    ToastAndroid.show(userDatas?.message, ToastAndroid.SHORT);
                     showMessage({
-                        message: t('Login Failed'),
-                        description: userDatas.message || t('Something went wrong'),
+                        message: userDatas.message,
+                        // description: userDatas.message || t('Something went wrong'),
                         type: 'danger',
                     });
                 }
@@ -268,34 +288,51 @@ const RegisterScreen = () => {
         }
     };
 
+    // useEffect(()=>{
+    //     // Alert.alert("rter")
+    //     showMessage({
+    //         message: "userDatas?.message",
+    //         description: "userDatas?.message",
+    //         type: 'success',
+    //     });
+    // },[])
+
+    function handleNavigate(){
+        navigation?.navigate('TermsAndCondtions')
+    }
+
+
 
     const renderTermsCheckbox = () => {
         return (
             <TouchableOpacity
                 style={styles.checkboxContainer}
-                onPress={toggleAcceptedTerms}
                 activeOpacity={0.7}
             >
                 <MaterialCommunityIcon
+                onPress={toggleAcceptedTerms}
                     name={formValues.acceptedTerms ? "checkbox-marked" : "checkbox-blank-outline"}
-                    size={wp(6)}
+                    size={wp(8)}
                     color={COLORS[theme].textPrimary}
                 />
-                <Text style={[styles.checkboxLabel, { color: COLORS[theme].textPrimary }]}>
-                    I accept the <Text style={{ color: COLORS[theme].accent, textDecorationLine: 'underline' }}>Terms and Privacy Policy</Text>
-                </Text>
+                <TouchableOpacity onPress={() => handleNavigate()}>
+                    <Text style={[styles.checkboxLabel, { color: COLORS[theme].textPrimary }]}>
+                        I accept the <Text style={{ color: COLORS[theme].accent, textDecorationLine: 'underline' }}>Terms and Privacy Policy</Text>
+                    </Text>
+                </TouchableOpacity>
             </TouchableOpacity>
         );
     };
     const getLabelByValue = (data, value) => {
         if (Array.isArray(value)) {
-            return data
+            return data 
                 .filter(item => value.includes(item.value))
                 .map(item => item.label)
                 .join(', ');
         }
         return data.find(item => item.value === value)?.label || '';
     };
+
     const openModal = (type, title, data) => {
         if (!Array.isArray(data)) data = [];
         setModalType(type);
@@ -303,7 +340,6 @@ const RegisterScreen = () => {
         setModalData(data);
         setModalVisible(true);
     };
-
     const handleModalSelect = (item) => {
         if (modalType === 'serviceType') {
             const selectedValues = item.map(i => i.value);
@@ -336,7 +372,7 @@ const RegisterScreen = () => {
             {renderLabel(label, isRequired)}
             {/* <Text>{numeric ? "num":"def"}</Text> */}
             <TextInput
-                keyboardType={numeric ? 'number-pad' : 'default'} maxLength={label == 'Mobile Number' || label == 'Vehicle Number' ? 10 : label == 'Weight' ? 6 : 25}
+                keyboardType={numeric ? 'number-pad' : 'default'} maxLength={label == 'Mobile Number' || label == 'Vehicle Number' ? 10 : label == 'Weight' ? 6 : label == 'Email ID' ? 50 : 25}
                 placeholder={label}
                 mode="outlined"
                 value={value}
@@ -370,7 +406,6 @@ const RegisterScreen = () => {
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
         </View>
     );
-
     const renderTransportCheckbox = (label) => {
         const selected = formValues.transportOptions.includes(label);
         return (
@@ -392,25 +427,39 @@ const RegisterScreen = () => {
         );
     };
 
+  
+
     return (
         <KeyboardAvoidingView
             style={[styles.container, { backgroundColor: COLORS[theme].background }]}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+            <View >
+            <FlashMessage style={{zIndex:111111}} position="top" />
+            </View>
             <HeaderBar showBackArrow={true} title="Register" />
-            <FlashMessage position="top" />
-
             <ScrollView
                 style={{ paddingHorizontal: wp(5), marginTop: wp(3) }}
                 showsVerticalScrollIndicator={false}
             >
-                {renderTextField('First Name', formValues.firstName, text => handleChange('firstName', text), errors.firstName, false, false)}
-                {renderTextField('Last Name', formValues.lastName, text => handleChange('lastName', text), errors.lastName)}
+                {renderTextField('First Name', formValues.firstName, text => handleChange('firstName', text), errors.firstName, false, true)}
+                {renderTextField('Last Name', formValues.lastName, text => handleChange('lastName', text), errors?.lastName)}
                 {renderTextField('Location', formValues.location, text => handleChange('location', text), errors.location)}
                 {renderTextField('Email ID', formValues.email, text => handleChange('email', text), errors.email)}
-                {renderTextField('Mobile Number', formValues.mobileNumber, text => handleChange('mobileNumber', text), errors.mobileNumber, false, true, true)}
-                {renderTextField('Weight', formValues.weight, text => handleChange('weight', text), errors.weight, false, true, true)}
-                {renderTextField('Vehicle Number', formValues.vehicle_no, text => handleChange('vehicle_no', text), errors.vehicle_no)}
+                {renderTextField('Referal Code', formValues.referal_code, text => handleChange('referal_code', text), errors?.referal_code, false, false)}
+                <TouchableOpacity onPress={() => setVerifyModalVisible(true)} style={styles.fieldContainer}>
+                    <Text style={[styles.label, { color: COLORS[theme].textPrimary }]}>{'Mobile Number'}</Text>
+                    <TextInput
+                        style={styles.input}
+                        mode="outlined"
+                        value={formValues.mobileNumber}
+                        editable={false}
+                        placeholder="Verify Mobile Number"
+                        textColor={COLORS[theme].textPrimary}
+                        right={<TextInput.Icon icon="chevron-right" color={COLORS[theme].textPrimary} />}
+                    />
+                </TouchableOpacity>
+
                 {renderTextField('Password', formValues.password, text => handleChange('password', text), errors.password, true, true)}
                 {renderTextField('Confirm Password', formValues.confirmPassword, text => handleChange('confirmPassword', text), errors.confirmPassword, true)}
                 {renderDropdownField(
@@ -425,6 +474,8 @@ const RegisterScreen = () => {
                     () => openModal('vehicleType', 'Select Vehicle Type', vehicleTypes),
                     errors.vehicleType
                 )}
+                {renderTextField('Weight', formValues.weight, text => handleChange('weight', text), errors.weight, false, true, true)}
+                {renderTextField('Vehicle Number', formValues.vehicle_no, text => handleChange('vehicle_no', text), errors.vehicle_no)}
                 <View style={{ marginBottom: hp(2), }}>
                     {renderLabel('Select Transport Option', true)}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingRight: wp(10) }}>
@@ -463,7 +514,11 @@ const RegisterScreen = () => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-
+            <VerifyPhoneModal
+                visible={verifyModalVisible}
+                onClose={() => setVerifyModalVisible(false)}
+                onVerified={handlePhoneVerification}
+            />
             <SelectionModal
                 visible={modalVisible}
                 data={modalData}

@@ -28,7 +28,7 @@ const UserToggleStatus = () => {
                 Authorization: `${accessToken}`,
                 driver_id: profile.driver_id,
             });
-            console.log('UpdatedProfile', JSON.stringify(data?.live_status ? "online" :"off"));
+            // console.log('UpdatedProfile', JSON.stringify(data?.live_status ? "online" :"off"));
             setIsOnline(data?.live_status ? true : false)
             dispatch({
                 type: 'PROFILE_DETAILS',

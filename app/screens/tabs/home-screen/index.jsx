@@ -24,8 +24,7 @@ const HomeScreen = () => {
   const { t } = useTranslation();
   const [location, setLocation] = useState(null);
   const mapRef = useRef(null);
-  const profile = useSelector(state => state.Auth.profile);
-
+  const profile = useSelector(state => state?.Auth?.profile);
   const requestLocationPermission = async () => {
     if (Platform.OS === 'ios') {
       return true; // iOS permissions handled via Info.plist
@@ -39,7 +38,6 @@ const HomeScreen = () => {
           buttonPositive: 'OK',
         }
       );
-
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
       console.warn('Permission error:', err);
@@ -54,6 +52,8 @@ const HomeScreen = () => {
           const token = await messaging().getToken();
           const id = await DeviceInfo.getUniqueId();
           // Alert.alert(JSON.stringify(token));
+          console.log("FCM TOKEN",JSON.stringify(token));
+
           // setFcmToken(token);
           // setDeviceId(id);
         } catch (error) {

@@ -19,6 +19,8 @@ import UserProfileCard from '../../UserProfileCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchData } from '../../../api/api';
 import DeviceInfo from 'react-native-device-info';
+import VersionCheck from 'react-native-version-check';
+
 // --- Logout Section ---
 const LogoutSection = () => {
   const { theme } = useTheme();
@@ -86,7 +88,7 @@ const ThemeSection = () => {
     </View>
   );
 };
-   
+
 // --- Language Toggle Section ---
 const LangSection = () => {
 
@@ -115,20 +117,55 @@ const MoreScreen = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const [availVersion] = useState('1.0.0'); // or fetch from config or constants
-  const profile = useSelector(state => state.Auth.profile);
+  // const profile = useSelector(state => state.Auth.profile);
+  const profile = useSelector(state => state.Auth.profileDetails);
+
   const navigation = useNavigation();
   const accessToken = useSelector(state => state.Auth.accessToken);
   const dispatch = useDispatch();
-  
+  const siteDetails = useSelector(state => state.Auth.siteDetails);
+
+  const checkUpdate = async () => {
+    const currentVersion = VersionCheck?.getCurrentVersion();
+    // const latestVersion = await VersionCheck.getLatestVersion();
+    const latestVersion = await VersionCheck.getLatestVersion({ provider: 'playStore' });
+    if (shouldUpdate(currentVersion, latestVersion)) {
+      console.log('❗ Update required');
+    } else {
+      console.log('✅ App is up to date');
+    } if (currentVersion && latestVersion && currentVersion !== latestVersion) {
+      console.log('Update available!', currentVersion, latestVersion);
+    } else {
+      console.log('App is up to date.');
+    }
+  };
+
+  const shouldUpdate = (currentVersion, minVersion) => {
+    const current = currentVersion.split('.').map(Number); // [1, 0, 3]
+    const minimum = minVersion.split('.').map(Number);     // [1, 0, 5]
+
+    for (let i = 0; i < Math.max(current.length, minimum.length); i++) {
+      const cur = current[i] || 0;
+      const min = minimum[i] || 0;
+
+      if (cur < min) return true;  // Needs update
+      if (cur > min) return false; // Current is already newer
+    }
+
+    return false; // Versions are equal
+  };
+
+
   useFocusEffect(
     useCallback(() => {
+      checkUpdate();
       const fetchProfileData = async () => {
-          console.log('profile'," JSON.stringify(data)");
+        console.log('profile', " JSON.stringify(data)");
         if (!accessToken || !profile?.driver_id) return;
-          console.log('profile', '2');
+        console.log('profile', '2');
 
         try {
-          const data = await fetchData('profile/'+ profile?.driver_id, 'GET', null, {
+          const data = await fetchData('profile/' + profile?.driver_id, 'GET', null, {
             Authorization: `${accessToken}`,
             driver_id: profile.driver_id,
             // device_id: deviceId,
@@ -148,8 +185,15 @@ const MoreScreen = () => {
     }, [])
   );
 
-  const SectionItem = ({ icon, label ,navigationPath}) => (
-    <TouchableOpacity onPress={()=>navigation?.navigate(navigationPath)} style={{ backgroundColor: COLORS[theme].viewBackground }}>
+
+  const SectionItem = ({ icon, label, navigationPath }) => (
+    <TouchableOpacity onPress={
+      () => {
+        // label !== 'razorpay' ? 
+        navigation?.navigate(navigationPath)
+        // :          fnGetRazorPay()
+      }
+    } style={{ backgroundColor: COLORS[theme].viewBackground }}>
       <View style={sectionRow}>
         <View style={leftRow}>
           <MaterialCommunityIcon
@@ -157,7 +201,7 @@ const MoreScreen = () => {
             size={wp(6)}
             color={COLORS[theme].textPrimary}
           />
-          <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary }]}>
+          <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary, textTransform: "capitalize" }]}>
             {t(label)}
           </Text>
         </View>
@@ -170,6 +214,7 @@ const MoreScreen = () => {
       </View>
     </TouchableOpacity>
   );
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={{ flex: 1, backgroundColor: COLORS[theme].background }}>
@@ -185,13 +230,16 @@ const MoreScreen = () => {
             gap: wp(2),
             marginHorizontal: wp(2),
           }}>
-          <SectionItem icon="face-man-profile" label="personal_info"  navigationPath='PersonalInfoScreen' navigation={navigation} />
+          <SectionItem icon="face-man-profile" label="personal_info" navigationPath='PersonalInfoScreen' navigation={navigation} />
+          <SectionItem icon="crown" navigation={navigation} label="subscription" navigationPath='SubscriptionList' />
           <SectionItem icon="wallet" label="wallet_history" navigationPath='WalletHistory' navigation={navigation} />
-          <SectionItem icon="archive-star"  navigation={navigation} label="reviews"  navigationPath='PersonalInfoScreen' />
+          <SectionItem icon="archive-star" navigation={navigation} label="reviews" navigationPath='PersonalInfoScreen' />
+          {/* <SectionItem icon="contactless-payment" navigation={navigation} label="razorpay" navigationPath='PersonalInfoScreen' /> */}
+          <SectionItem icon="shield-check" navigation={navigation} label="Terms and Conditions" navigationPath='TermsAndCondtions' />
+
           <ThemeSection />
           <LangSection />
           <LogoutSection />
-
           {/* App Version Info */}
           <View style={{ backgroundColor: COLORS[theme].viewBackground }}>
             <View style={sectionRow}>
@@ -207,7 +255,7 @@ const MoreScreen = () => {
                   </Text>
                 </View>
                 <Text style={[poppins.medium.h7, { color: COLORS[theme].textPrimary }]}>
-                  {`(v.${availVersion})`}
+                  {`(v.${DeviceInfo?.getVersion()})`}
                 </Text>
               </View>
             </View>
@@ -221,17 +269,14 @@ const MoreScreen = () => {
 // --- Common Styles ---
 const sectionRow = {
   flexDirection: 'row',
-  paddingVertical: wp(4),
-  paddingEnd: wp(4),
-  alignItems: 'center',
-  justifyContent: 'space-between',
+  paddingVertical: wp(4), paddingEnd: wp(4),
+  alignItems: 'center', justifyContent: 'space-between',
   gap: wp(3.5),
 };
 
 const leftRow = {
   flexDirection: 'row',
-  alignItems: 'center',
-  marginStart: wp(8),
+  alignItems: 'center', marginStart: wp(8),
   gap: wp(4),
 };
 

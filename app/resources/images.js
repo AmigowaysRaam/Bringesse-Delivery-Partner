@@ -6,9 +6,9 @@ const IMAGE_ASSETS = {
   scooter: require('../assets/images/scooter.png'),
   moneybag: require('../assets/images/moneybag.png'),
   schedule: require('../assets/images/schedule.png'),
+  subscription: require('../assets/images/subscription.png'),
 
-
-
+  
   
   
 };

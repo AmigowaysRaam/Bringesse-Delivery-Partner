@@ -9,6 +9,10 @@ import PersonalInfoScreen from '../screens/tabs/Edit-profile';
 import EditProfile from '../screens/tabs/Edit-profile/editProfile';
 import RegisterScreen from '../screens/tabs/Edit-profile/RegisterScreen';
 import WalletHistory from '../screens/WalletHistory';
+import SubscriptionList from '../screens/SubscriptionList';
+import UpdateProfilePic from '../screens/UpdateProfilePic';
+import ChangePassword from '../screens/tabs/Edit-profile/ChangePassword';
+import TermsandCondtions from '../screens/TermsandCondtions';
 const Stack = createNativeStackNavigator();
 const MyTheme = {
   dark: true,
@@ -37,16 +41,18 @@ function InitialRouter() {
           animationEnabled: false,  // Disable animations for all screens
         }} />
         <Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />
-        
         <Stack.Screen name="PersonalInfoScreen" component={PersonalInfoScreen} />
-        
         <Stack.Screen name="EditProfile" component={EditProfile} />
         <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
         <Stack.Screen name="WalletHistory" component={WalletHistory} />
+        <Stack.Screen name="UpdateProfilePic" component={UpdateProfilePic} />
+        <Stack.Screen name="SubscriptionList" component={SubscriptionList} />
+        <Stack.Screen name="ChangePassword" component={ChangePassword} />
+        <Stack.Screen name="TermsAndCondtions" component={TermsandCondtions} />
 
         
-        
       </Stack.Navigator>
+
     </NavigationContainer>
   );
 }

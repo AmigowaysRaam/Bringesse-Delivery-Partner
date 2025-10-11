@@ -4665,6 +4665,7 @@ __metadata:
     react-native-paper-dropdown: ^2.3.1
     react-native-permissions: ^5.2.5
     react-native-ratings: ^8.1.0
+    react-native-razorpay: ^2.3.0
     react-native-reanimated: 3.19.0
     react-native-reanimated-carousel: 4.0.0-canary.15
     react-native-reanimated-skeleton: ^1.5.1
@@ -4680,6 +4681,7 @@ __metadata:
     react-native-toast-message: ^2.2.1
     react-native-vector-icons: ^10.1.0
     react-native-version-check: ^3.4.7
+    react-native-vision-camera: ^4.7.2
     react-native-webview: ^13.13.2
     react-redux: ^9.1.2
     react-test-renderer: 19.0.0
@@ -10498,6 +10500,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-razorpay@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "react-native-razorpay@npm:2.3.0"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-native: ">=0.66.0"
+  checksum: 35a549938e001d2ad30f8bcacc04df05070ea8cafc201e8938c750f5abc9b4c9ad29240924398030a1cc3633ac3e71d1871f29ff7bdf9096aa0d9cbd304d2ad4
+  languageName: node
+  linkType: hard
+
 "react-native-reanimated-carousel@npm:4.0.0-canary.15":
   version: 4.0.0-canary.15
   resolution: "react-native-reanimated-carousel@npm:4.0.0-canary.15"
@@ -10752,6 +10764,26 @@ __metadata:
   peerDependencies:
     react-native: ">=0.48.0"
   checksum: 34aecfd90413c8fe2021718a6b1ef0bc71ee312261de91c4d7a63b29dfdc3be1fa44d98d57e0fe70023c1c512c7cc856f01de23b95c8b8554477989b4e1fa51b
+  languageName: node
+  linkType: hard
+
+"react-native-vision-camera@npm:^4.7.2":
+  version: 4.7.2
+  resolution: "react-native-vision-camera@npm:4.7.2"
+  peerDependencies:
+    "@shopify/react-native-skia": "*"
+    react: "*"
+    react-native: "*"
+    react-native-reanimated: "*"
+    react-native-worklets-core: "*"
+  peerDependenciesMeta:
+    "@shopify/react-native-skia":
+      optional: true
+    react-native-reanimated:
+      optional: true
+    react-native-worklets-core:
+      optional: true
+  checksum: d0ed87b10f0be61c25b317cc599a7c4724ff6baccea211dd5b26bcf906c197e7445ef69a0ba4fa41a68221d8d90e941f2f55410c363b4a63209a41a3d0fa3f7d
   languageName: node
   linkType: hard
 

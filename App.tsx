@@ -17,6 +17,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import NetInfo from '@react-native-community/netinfo';
 import { Provider } from 'react-redux';
 import { store as configureStore } from 'react-boilerplate-redux-saga-hoc';
+import FlashMessage from "react-native-flash-message";
 
 import {
   PaperProvider,
@@ -79,7 +80,7 @@ function App(): React.JSX.Element {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
+    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
       if (!state.isConnected) {
         setNetwork(false);
         openNetworkSettings();
@@ -88,7 +89,7 @@ function App(): React.JSX.Element {
       }
     });
 
-    return unsubscribe;
+    return unsubscribeNetInfo;
   }, []);
 
   const openNetworkSettings = () => {
@@ -119,31 +120,20 @@ function App(): React.JSX.Element {
       { cancelable: false }
     );
   };
-  useEffect(() => {
-    checkPushNotificationPermission();
-  
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      const title = remoteMessage.notification?.title || 'Default Title';
-      const body = remoteMessage.notification?.body || 'Default Body';
-  
-      // Show alert when notification arrives
-      Alert.alert(title, body);
-  
-      // Optional: show local notification as well
-      onDisplayNotification({ title, body });
-    });
-  
-    return unsubscribe;
-  }, []);
-  
 
   useEffect(() => {
     checkPushNotificationPermission();
-    const unsubscribe = messaging().onMessage(remoteMessage => {
-      onDisplayNotification({
-        title: remoteMessage.notification?.title || 'Default Title',
-        body: remoteMessage.notification?.body || 'Default Body',
-      });
+
+    // 🔁 Handle FCM foreground messages
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      const hasNotificationPayload = !!remoteMessage.notification;
+      // console.log(remoteMessage.data);
+      // 🛑 Prevent duplicate if notification payload exists (Firebase will auto-show it)
+      if (!hasNotificationPayload) {
+        const title = remoteMessage.data?.scope || 'Default Title';
+        const body = remoteMessage.data?.message || 'Default Body';
+        onDisplayNotification({ title, body });
+      }
     });
 
     return unsubscribe;
@@ -157,7 +147,9 @@ function App(): React.JSX.Element {
         await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
         );
-      } catch (error) {}
+      } catch (error) {
+        console.warn('Notification permission error:', error);
+      }
     }
   }
 
@@ -180,7 +172,7 @@ function App(): React.JSX.Element {
       body,
       android: {
         channelId,
-        smallIcon: 'ic_launcher', // make sure this icon exists
+        smallIcon: 'ic_launcher', // Ensure this exists in res/drawable
         pressAction: {
           id: 'default',
         },
@@ -196,7 +188,6 @@ function App(): React.JSX.Element {
     </ThemeProvider>
   );
 }
-
 
 const AppContainer = () => {
   const { theme } = useTheme();

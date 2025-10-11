@@ -3,29 +3,37 @@ import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { COLORS } from '../resources/colors';
-import { wp } from '../resources/dimensions';
+import { hp, wp } from '../resources/dimensions';
 import { poppins } from '../resources/fonts';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 const UserProfileCard = () => {
     const { theme } = useTheme();
     const { t } = useTranslation();
-    const profile = useSelector(state => state.Auth.profile);
+    const profile = useSelector(  state => state.Auth.profile);
     const siteDetails = useSelector(state => state.Auth.siteDetails);
     const navigation = useNavigation();
-    // Mock user data — you can replace these with real user data props or from context/store
-    const userName = `${profile?.first_name }  ${ profile?.last_name}`;
-    const userDesignation = '';
+    const userName = `${profile?.first_name}  ${profile?.last_name}`;
     return (
         <View style={[
             styles.card,
             { backgroundColor: COLORS[theme].background, borderColor: '#ccc' }
         ]}>
-            <Image
-        source={{ uri: siteDetails?.media_url + 'drivers/images/' + profile?.driver_image }}
-        style={{ width: wp(15), height: wp(15), borderRadius: wp(7.5), borderWidth: wp(0.5), borderColor: COLORS[theme].primary, borderColor: COLORS[theme].accent }}
+           <TouchableOpacity 
+           onPress={()=>navigation?.navigate('UpdateProfilePic')}
+            >
+           <Image
+                source={{ uri: siteDetails?.media_url + 'drivers/images/' + profile?.driver_image }}
+                style={{ width: wp(15), height: wp(15), borderRadius: wp(7.5), borderWidth: wp(0.5), borderColor: COLORS[theme].primary, borderColor: COLORS[theme].accent }}
             />
+            <MaterialCommunityIcon
+                name="pencil-circle"
+                size={wp(8)}
+                style={{position:"absolute",marginBottom:wp(2),left:hp(5)}}
+                color={COLORS[theme].textPrimary}
+            />
+           </TouchableOpacity>
             <Text style={[
                 poppins.semi_bold.h6,
                 styles.text,
@@ -33,8 +41,8 @@ const UserProfileCard = () => {
             ]}>
                 {userName}
             </Text>
-            <TouchableOpacity onPress={()=>navigation.navigate('EditProfile')} style={{ borderColor: COLORS[theme].buttonBg, padding: wp(2), borderRadius: wp(1),borderWidth:wp(0.4),width:wp(35),alignItems:"center",height:wp(9) }}>
-                <Text style={[poppins.regular.h7, { color: COLORS[theme].buttonBg ,lineHeight:wp(4)}]}>
+            <TouchableOpacity onPress={() => navigation.navigate('EditProfile')} style={{ borderColor: COLORS[theme].buttonBg, padding: wp(2), borderRadius: wp(1), borderWidth: wp(0.4), width: wp(35), alignItems: "center", height: wp(9) }}>
+                <Text style={[poppins.regular.h7, { color: COLORS[theme].buttonBg, lineHeight: wp(4) }]}>
                     {t('edit_profile')}
                 </Text>
             </TouchableOpacity>
